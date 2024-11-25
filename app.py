@@ -66,8 +66,9 @@ elif option == 'Upload your own file':
         st.success(f"Uploaded file: {uploaded_file.name}")
 
 # If a graph is loaded, compute and visualize PageRank
-
+print(graph)
 if graph is not None:
+    
     if st.button("Compute PageRank"):
         st.write("Computing PageRank of",graph)
         pagerank = compute_pagerank(graph)
