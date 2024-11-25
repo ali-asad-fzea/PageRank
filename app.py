@@ -1,139 +1,85 @@
-import requests
-from bs4 import BeautifulSoup
+import streamlit as st
 import networkx as nx
 import matplotlib.pyplot as plt
-from urllib.parse import urlparse
 import os
 import pickle
-import streamlit as st
 
-# Create a directory for uploads
+# Configuration
+DATASETS_FOLDER = './datasets'
 UPLOAD_FOLDER = './uploads'
+
+# Ensure necessary folders exist
+os.makedirs(DATASETS_FOLDER, exist_ok=True)
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-def merge_url_schemes2(input_dict):
-    result = {}
-    for url, value in input_dict.items():
-        base_url = url.split('://')[-1]
-        if base_url in result:
-            result[base_url] += value
-        else:
-            result[base_url] = value
-    final_result = {}
-    for url in result:
-        final_result[f"https://{url}"] = result[url]
-    return final_result
-
-def merge_url_schemes_with_subdomains(input_dict):
-    result = {}
-    for url, value in input_dict.items():
-        parsed_url = urlparse(url)
-        domain_parts = parsed_url.netloc.split('.')
-        if len(domain_parts) > 2:
-            root_domain = '.'.join(domain_parts[-2:])
-        else:
-            root_domain = parsed_url.netloc
-        normalized_url = f"https://{root_domain}"
-        if normalized_url in result:
-            result[normalized_url] += value
-        else:
-            result[normalized_url] = value
-    return result
-
-def merge_url_schemes(input_dict):
-    result = {}
-    for url, value in input_dict.items():
-        parsed_url = urlparse(url)
-        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}"
-        if base_url in result:
-            result[base_url] += value
-        else:
-            result[base_url] = value
-    return merge_url_schemes2(result)
-
-def crawl(start_url, max_depth=3):
-    visited = set()
-    graph = nx.DiGraph()
-
-    def crawl_page(url, depth):
-        if depth > max_depth or url in visited:
-            return
-        visited.add(url)
-        try:
-            response = requests.get(url)
-            soup = BeautifulSoup(response.text, 'html.parser')
-            links = [a['href'] for a in soup.find_all('a', href=True)]
-            for link in links:
-                if link.startswith('http') or link.startswith('https'):
-                    graph.add_edge(url, link)
-                    crawl_page(link, depth + 1)
-        except requests.exceptions.RequestException:
-            pass
-
-    crawl_page(start_url, 0)
-    return graph
-
 def compute_pagerank(graph):
+    """Compute PageRank for a given graph."""
     pagerank = nx.pagerank(graph, max_iter=100, tol=1e-08)
     return pagerank
 
 def visualize_pagerank(graph, pagerank):
+    """Visualize the PageRank of the graph."""
     pos = nx.spring_layout(graph, k=0.15, iterations=20)
     node_size = [pagerank[node] * 10000 for node in graph.nodes()]
     plt.figure(figsize=(12, 12))
-    nx.draw(graph, pos, with_labels=True, node_size=node_size, node_color='skyblue', font_size=10, font_weight='bold', edge_color='gray')
+    nx.draw(graph, pos, with_labels=True, node_size=node_size, node_color='skyblue', 
+            font_size=10, font_weight='bold', edge_color='gray')
     plt.title('PageRank Visualization')
     st.pyplot()
 
-def normalize_base_url(url):
-    parsed_url = urlparse(url)
-    return parsed_url.netloc
-
-def merge_nodes(graph):
-    normalize_mapping = {}
-    for node in list(graph.nodes):
-        normalized_id = normalize_base_url(node)
-        if normalized_id in normalize_mapping:
-            existing_node = normalize_mapping[normalized_id]
-            graph = nx.contracted_nodes(graph, existing_node, node, self_loops=False)
-        else:
-            normalize_mapping[normalized_id] = node
-    return graph
+def load_available_datasets():
+    """Load available datasets from the datasets folder."""
+    datasets = [f for f in os.listdir(DATASETS_FOLDER) if f.endswith('.graphml')]
+    return datasets
 
 # Streamlit UI
 st.title("PageRank Calculation and Visualization")
-st.sidebar.header("Input")
-url = st.sidebar.text_input("Enter a URL to crawl", "")
+st.sidebar.header("Select or Upload a Graph")
 
-file = st.sidebar.file_uploader("Upload a GraphML File", type=["graphml"])
+# Provide options to either select a preloaded dataset or upload a file
+option = st.sidebar.radio(
+    "Choose an option",
+    ('Select from available datasets', 'Upload your own file')
+)
 
-if url:
-    graph = crawl(url)
-    pagerank = compute_pagerank(graph)
-    st.write("PageRank Values:")
-    st.write(pagerank)
-    visualize_pagerank(graph, pagerank)
+graph = None
+pagerank = None
 
-elif file:
-    if file.name.endswith('.graphml'):
-        filepath = os.path.join(UPLOAD_FOLDER, file.name)
+if option == 'Select from available datasets':
+    datasets = load_available_datasets()
+    if datasets:
+        dataset = st.sidebar.selectbox("Select a dataset", datasets)
+        if st.sidebar.button("Load Dataset"):
+            filepath = os.path.join(DATASETS_FOLDER, dataset)
+            graph = nx.read_graphml(filepath)
+            st.success(f"Loaded dataset: {dataset}")
+    else:
+        st.warning("No datasets available in the datasets folder.")
+
+elif option == 'Upload your own file':
+    uploaded_file = st.sidebar.file_uploader("Upload a GraphML file", type=["graphml"])
+    if uploaded_file:
+        filepath = os.path.join(UPLOAD_FOLDER, uploaded_file.name)
         with open(filepath, "wb") as f:
-            f.write(file.getbuffer())
+            f.write(uploaded_file.getbuffer())
         graph = nx.read_graphml(filepath)
+        st.success(f"Uploaded file: {uploaded_file.name}")
+
+# If a graph is loaded, compute and visualize PageRank
+if graph is not None:
+    if st.button("Compute PageRank"):
         pagerank = compute_pagerank(graph)
         st.write("PageRank Values:")
         st.write(pagerank)
         visualize_pagerank(graph, pagerank)
-        
-        # Save the pagerank values for future use
+
+        # Save PageRank values for future use
         with open('ranks.pkl', 'wb') as f:
             pickle.dump(pagerank, f)
 
-        # Merge URLs in the pagerank
-        pagerank = merge_url_schemes(pagerank)
-        pagerank = dict(reversed(sorted(pagerank.items(), key=lambda item: item[1])))
-        st.write("Merged PageRank:")
-        st.write(pagerank)
+        # Show sorted PageRank results
+        sorted_pagerank = dict(sorted(pagerank.items(), key=lambda item: item[1], reverse=True))
+        st.write("Sorted PageRank:")
+        st.write(sorted_pagerank)
 else:
-    st.write("Please input a URL or upload a GraphML file to begin.")
-
+    st.info("Please select a dataset or upload a file to proceed.")
