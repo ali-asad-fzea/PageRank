@@ -83,5 +83,5 @@ if graph is not None:
         sorted_pagerank = dict(sorted(pagerank.items(), key=lambda item: item[1], reverse=True))
         st.write("Sorted PageRank:")
         st.write(sorted_pagerank)
-else:
-    st.info("Please select a dataset or upload a file to proceed.")
+# else:
+#     st.info("Please select a dataset or upload a file to proceed.")
