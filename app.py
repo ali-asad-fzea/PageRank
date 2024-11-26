@@ -110,20 +110,20 @@ if graph:
             top_k_result = get_top_n_ranks(std_rank, int2node_sp, top_k)
             st.write(f"Top {top_k} nodes for Standard PageRank:")
             st.write(top_k_result)
-            visualize_pagerank(graph, {node: std_rank[int(node)] for node in graph.nodes()}, "Standard PageRank")
+            # visualize_pagerank(graph, {node: std_rank[int(node)] for node in graph.nodes()}, "Standard PageRank")
 
         elif algo_option == 'Weighted':
             w_rank, _ = Weighted_PageRank(G_sp, W, int2node_sp, alpha).run()
             top_k_result = get_top_n_ranks(w_rank, int2node_sp, top_k)
             st.write(f"Top {top_k} nodes for Weighted PageRank:")
             st.write(top_k_result)
-            visualize_pagerank(graph, {node: w_rank[int(node)] for node in graph.nodes()}, "Weighted PageRank")
+            # visualize_pagerank(graph, {node: w_rank[int(node)] for node in graph.nodes()}, "Weighted PageRank")
 
         elif algo_option == 'Simplified':
             sim_rank, _ = Simplified_PageRank(G_sp, iteration=n_iter).run()
             top_k_result = get_top_n_ranks(sim_rank, int2node_sp, top_k)
             st.write(f"Top {top_k} nodes for Simplified PageRank:")
             st.write(top_k_result)
-            visualize_pagerank(graph, {node: sim_rank[int(node)] for node in graph.nodes()}, "Simplified PageRank")
+            # visualize_pagerank(graph, {node: sim_rank[int(node)] for node in graph.nodes()}, "Simplified PageRank")
 else:
     st.info("Please select a dataset or upload a file to proceed.")
