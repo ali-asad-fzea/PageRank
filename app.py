@@ -45,10 +45,10 @@ def display_top_k_as_table(top_k_result):
         "PageRank": [rank for _, rank in top_k_result],
     }
     df = pd.DataFrame(table_data)
-    df.set_index("row", inplace=True)
+    df.set_index("Rank", inplace=True)
     st.table(df)
 # Streamlit UI
-st.title("Custom PageRank Algorithms with Visualization")
+st.title("Graph PageRank Computation")
 st.sidebar.header("Options")
 
 # Initialize session state
