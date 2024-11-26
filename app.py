@@ -44,9 +44,10 @@ def display_top_k_as_table(top_k_result):
         "Node ID": [node for node, _ in top_k_result],
         "PageRank": [rank for _, rank in top_k_result],
     }
+    # df = pd.DataFrame(table_data)
+    # st.table(df)
     df = pd.DataFrame(table_data)
-    st.table(df)
-
+    st.write(df.to_markdown(index=False), unsafe_allow_html=True)
 # Streamlit UI
 st.title("Custom PageRank Algorithms with Visualization")
 st.sidebar.header("Options")
