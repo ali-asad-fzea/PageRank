@@ -85,7 +85,7 @@ graph = st.session_state['graph']
 
 if graph:
     # Display graph information
-    st.write(f"Graph Information:\n{nx.info(graph)}")
+    st.write(f"Graph Information:\n{graph}")
     if not graph.is_directed():
         graph = graph.to_directed()
         st.warning("Converted undirected graph to directed for PageRank computation.")
