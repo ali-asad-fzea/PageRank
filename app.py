@@ -32,8 +32,8 @@ def visualize_pagerank(graph, pagerank, title="PageRank Visualization"):
 
 def get_top_n_ranks(scores, int2node, n):
     # Create a list of (node, score) tuples and sort by score in descending order
-    sorted_scores = sorted(enumerate(scores), key=lambda x: x[0], reverse=True)
-    top_n = [(node, score) for node, score in sorted_scores[:n]]
+    sorted_scores = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)
+    top_n = [(int2node[node], score) for node, score in sorted_scores[:n]]
     return top_n
 
 # Streamlit UI
