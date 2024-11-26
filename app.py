@@ -47,6 +47,7 @@ pagerank = None
 
 if option == 'Select from available datasets':
     datasets = load_available_datasets()
+    st.write("Available datasets:", datasets)  # Show available datasets
     if datasets:
         dataset = st.sidebar.selectbox("Select a dataset", datasets)
         if st.sidebar.button("Load Dataset"):
@@ -66,14 +67,12 @@ elif option == 'Upload your own file':
         st.success(f"Uploaded file: {uploaded_file.name}")
 
 # If a graph is loaded, compute and visualize PageRank
-print(graph)
 if graph is not None:
-    
+    st.write("Graph loaded successfully:", graph)
     if st.button("Compute PageRank"):
-        st.write("Computing PageRank of",graph)
+        st.write("Computing PageRank of the graph...")
         pagerank = compute_pagerank(graph)
-        st.write("PageRank Values:")
-        st.write(pagerank)
+        st.write("PageRank Values:", pagerank)
         visualize_pagerank(graph, pagerank)
 
         # Save PageRank values for future use
@@ -84,5 +83,5 @@ if graph is not None:
         sorted_pagerank = dict(sorted(pagerank.items(), key=lambda item: item[1], reverse=True))
         st.write("Sorted PageRank:")
         st.write(sorted_pagerank)
-# else:
-#     st.info("Please select a dataset or upload a file to proceed.")
+else:
+    st.info("Please select a dataset or upload a file to proceed.")
