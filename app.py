@@ -42,7 +42,7 @@ def display_top_k_as_table(top_k_result):
     table_data = {
         "Rank": [i + 1 for i in range(len(top_k_result))],
         "Node ID": [node for node, _ in top_k_result],
-        "PageRank": [rank for _, rank in top_k_result],
+        "PageRank Value": [rank for _, rank in top_k_result],
     }
     df = pd.DataFrame(table_data)
     df.set_index("Rank", inplace=True)
@@ -112,7 +112,7 @@ if graph:
     # Algorithm and parameters selection
     algo_option = st.sidebar.selectbox("Select a PageRank Algorithm", ['Standard', 'Weighted', 'Simplified'])
     alpha = st.sidebar.slider("Set Alpha (Damping Factor)", 0.1, 1.0, 0.85, 0.01)
-    n_iter = st.sidebar.number_input("Set Number of Iterations", min_value=10, max_value=1000, value=100, step=10)
+    n_iter = 500
     top_k = st.sidebar.number_input("Set Top K Nodes", min_value=1, max_value=100, value=10, step=1)
 
     if st.button("Compute PageRank"):
