@@ -95,7 +95,7 @@ int2node_sp = st.session_state['int2node_sp']
 W = st.session_state['W']
 
 if graph:
-    st.write(f"Graph Information:\n{nx.info(graph)}")
+    st.write(f"Graph Information:\n{graph}")
 
     # Algorithm and parameters selection
     algo_option = st.sidebar.selectbox("Select a PageRank Algorithm", ['Standard', 'Weighted', 'Simplified'])
