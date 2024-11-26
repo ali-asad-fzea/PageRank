@@ -31,10 +31,11 @@ def visualize_pagerank(graph, pagerank, title="PageRank Visualization"):
     plt.title(title)
     st.pyplot(plt)
 
-def get_top_n_ranks(rank_dict, int2node_map, n):
-    """Return the top N ranked nodes."""
-    sorted_ranks = sorted(rank_dict.items(), key=lambda item: item[1], reverse=True)
-    return [(int2node_map[node], rank) for node, rank in sorted_ranks[:n]]
+def get_top_n_ranks(scores, int2node, n):
+    # Create a list of (node, score) tuples and sort by score in descending order
+    sorted_scores = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)
+    top_n = [(node, score) for node, score in sorted_scores[:n]]
+    return top_n
 
 def display_top_k_as_table(top_k_result):
     """Display the top_k results as a table."""
