@@ -49,7 +49,7 @@ def display_top_k_as_table(top_k_result):
     st.table(df)
 # Streamlit UI
 st.title("Graph PageRank Computation")
-st.sidebar.header("Options")
+st.sidebar.header("Parameters")
 
 # Initialize session state
 if 'graph' not in st.session_state:
@@ -113,7 +113,7 @@ if graph:
     algo_option = st.sidebar.selectbox("Select a PageRank Algorithm", ['Standard', 'Weighted', 'Simplified'])
     alpha = st.sidebar.slider("Set Alpha (Damping Factor)", 0.1, 1.0, 0.85, 0.01)
     n_iter = 500
-    top_k = st.sidebar.number_input("Set Top K Nodes", min_value=1, max_value=100, value=10, step=1)
+    top_k = st.sidebar.number_input("Set Top K Nodes to view", min_value=1, max_value=100, value=10, step=1)
 
     if st.button("Compute PageRank"):
         if algo_option == 'Standard':
