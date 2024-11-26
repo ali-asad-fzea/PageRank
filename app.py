@@ -3,6 +3,7 @@ import networkx as nx
 import os
 import pickle
 import matplotlib.pyplot as plt
+import pandas as pd
 
 # Import custom PageRank implementations
 from Algorithms.Weighted import Weighted_PageRank
@@ -30,11 +31,20 @@ def visualize_pagerank(graph, pagerank, title="PageRank Visualization"):
     plt.title(title)
     st.pyplot(plt)
 
-def get_top_n_ranks(scores, int2node, n):
-    # Create a list of (node, score) tuples and sort by score in descending order
-    sorted_scores = sorted(enumerate(scores), key=lambda x: x[1], reverse=True)
-    top_n = [(int2node[node], score) for node, score in sorted_scores[:n]]
-    return top_n
+def get_top_n_ranks(rank_dict, int2node_map, n):
+    """Return the top N ranked nodes."""
+    sorted_ranks = sorted(rank_dict.items(), key=lambda item: item[1], reverse=True)
+    return [(int2node_map[node], rank) for node, rank in sorted_ranks[:n]]
+
+def display_top_k_as_table(top_k_result):
+    """Display the top_k results as a table."""
+    table_data = {
+        "Rank": [i + 1 for i in range(len(top_k_result))],
+        "Node ID": [node for node, _ in top_k_result],
+        "PageRank": [rank for _, rank in top_k_result],
+    }
+    df = pd.DataFrame(table_data)
+    st.table(df)
 
 # Streamlit UI
 st.title("Custom PageRank Algorithms with Visualization")
@@ -96,7 +106,7 @@ int2node_sp = st.session_state['int2node_sp']
 W = st.session_state['W']
 
 if graph:
-    st.write(f"Graph Information:\n{graph}")
+    st.write(f"Graph Information:\n{(graph)}")
 
     # Algorithm and parameters selection
     algo_option = st.sidebar.selectbox("Select a PageRank Algorithm", ['Standard', 'Weighted', 'Simplified'])
@@ -109,21 +119,18 @@ if graph:
             std_rank, _ = Standard_PageRank(G_sp, int2node_sp, alpha, n_iter).run()
             top_k_result = get_top_n_ranks(std_rank, int2node_sp, top_k)
             st.write(f"Top {top_k} nodes for Standard PageRank:")
-            st.write(top_k_result)
-            # visualize_pagerank(graph, {node: std_rank[int(node)] for node in graph.nodes()}, "Standard PageRank")
+            display_top_k_as_table(top_k_result)
 
         elif algo_option == 'Weighted':
             w_rank, _ = Weighted_PageRank(G_sp, W, int2node_sp, alpha).run()
             top_k_result = get_top_n_ranks(w_rank, int2node_sp, top_k)
             st.write(f"Top {top_k} nodes for Weighted PageRank:")
-            st.write(top_k_result)
-            # visualize_pagerank(graph, {node: w_rank[int(node)] for node in graph.nodes()}, "Weighted PageRank")
+            display_top_k_as_table(top_k_result)
 
         elif algo_option == 'Simplified':
             sim_rank, _ = Simplified_PageRank(G_sp, iteration=n_iter).run()
             top_k_result = get_top_n_ranks(sim_rank, int2node_sp, top_k)
             st.write(f"Top {top_k} nodes for Simplified PageRank:")
-            st.write(top_k_result)
-            # visualize_pagerank(graph, {node: sim_rank[int(node)] for node in graph.nodes()}, "Simplified PageRank")
+            display_top_k_as_table(top_k_result)
 else:
     st.info("Please select a dataset or upload a file to proceed.")
