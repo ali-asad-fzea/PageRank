@@ -111,7 +111,10 @@ if graph:
 
     # Algorithm and parameters selection
     algo_option = st.sidebar.selectbox("Select a PageRank Algorithm", ['Standard', 'Weighted', 'Simplified'])
-    alpha = st.sidebar.slider("Set Alpha (Damping Factor)", 0.1, 1.0, 0.85, 0.01)
+    if algo_option != 'Simplified':
+        alpha = st.sidebar.slider("Set Alpha (Damping Factor)", 0.1, 1.0, 0.85, 0.01)
+    else:
+        alpha = 1.0
     n_iter = 500
     top_k = st.sidebar.number_input("Set Top K Nodes to view", min_value=1, max_value=100, value=10, step=1)
 
